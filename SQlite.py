@@ -5,8 +5,17 @@ from collections import Counter
 
 
 def connect_sqlite(database_path):
+    """
+    Connect to an SQLite database and return the connection and cursor.
+
+    Parameters:
+    - database_path (str): Path to the SQLite database.
+
+    Returns:
+    - conn (sqlite3.Connection): SQLite database connection.
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    """
     try:
-        # Attempt to connect to the SQLite database
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
 
@@ -23,6 +32,18 @@ def connect_sqlite(database_path):
 
 
 def import_csv_to_sqlite(conn, cursor, csv_path, table_name):
+    """
+    Import data from a CSV file into an SQLite database.
+
+    Parameters:
+    - conn (sqlite3.Connection): SQLite database connection.
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    - csv_path (str): Path to the CSV file.
+    - table_name (str): Name of the table to create.
+
+    Returns:
+    None
+    """
     try:
         with open(csv_path, 'r') as csv_file:
             csv_reader = csv.reader(csv_file)
@@ -44,6 +65,18 @@ def import_csv_to_sqlite(conn, cursor, csv_path, table_name):
 
 
 def validate_email_addresses(conn, cursor, table_name, column_name):
+    """
+    Validate email addresses in a specified column of an SQLite table.
+
+    Parameters:
+    - conn (sqlite3.Connection): SQLite database connection.
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    - table_name (str): Name of the table to validate.
+    - column_name (str): Name of the column containing email addresses.
+
+    Returns:
+    None
+    """
     try:
         query = f"SELECT {column_name} FROM {table_name};"
         cursor.execute(query)
@@ -61,6 +94,16 @@ def validate_email_addresses(conn, cursor, table_name, column_name):
 
 
 def log_query(cursor, query):
+    """
+    Log a query to an 'query_logs' table in the SQLite database.
+
+    Parameters:
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    - query (str): SQL query to log.
+
+    Returns:
+    None
+    """
     try:
         cursor.execute("CREATE TABLE IF NOT EXISTS query_logs (query_text TEXT);")
         # Log the query to a table named 'query_logs'
@@ -70,6 +113,17 @@ def log_query(cursor, query):
 
 
 def predict_most_repeatable_queries(conn, cursor, top_n=5):
+    """
+    Predict the most repeatable queries based on query logs.
+
+    Parameters:
+    - conn (sqlite3.Connection): SQLite database connection.
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    - top_n (int): Number of top queries to display. Default is 5.
+
+    Returns:
+    None
+    """
     try:
         # Fetch query_text and count their occurrences
         query = "SELECT query_text FROM query_logs;"
@@ -95,6 +149,20 @@ def predict_most_repeatable_queries(conn, cursor, top_n=5):
 
 
 def perform_boundary_check(conn, cursor, table_name, column_name, min_value, max_value):
+    """
+    Perform a boundary check on a specified column in an SQLite table.
+
+    Parameters:
+    - conn (sqlite3.Connection): SQLite database connection.
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    - table_name (str): Name of the table to perform the check.
+    - column_name (str): Name of the column to check.
+    - min_value (int): Minimum allowed value.
+    - max_value (int): Maximum allowed value.
+
+    Returns:
+    None
+    """
     try:
         query = f"SELECT * FROM {table_name} WHERE {column_name} < ? OR {column_name} > ?"
         cursor.execute(query, (min_value, max_value))
@@ -110,6 +178,19 @@ def perform_boundary_check(conn, cursor, table_name, column_name, min_value, max
 
 
 def validate_age_entries(conn, cursor, table_name, column_name, age_threshold):
+    """
+    Validate age entries in a specified column of an SQLite table.
+
+    Parameters:
+    - conn (sqlite3.Connection): SQLite database connection.
+    - cursor (sqlite3.Cursor): SQLite database cursor.
+    - table_name (str): Name of the table to validate.
+    - column_name (str): Name of the column containing age entries.
+    - age_threshold (int): Minimum allowed age.
+
+    Returns:
+    None
+    """
     try:
         query = f"SELECT user_id, age FROM {table_name};"
         cursor.execute(query)
