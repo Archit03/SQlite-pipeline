@@ -1,6 +1,7 @@
 import re
 import sqlite3
 import csv
+from collections import Counter
 
 
 def connect_sqlite(database_path):
@@ -59,6 +60,40 @@ def validate_email_addresses(conn, cursor, table_name, column_name):
         print(f"Error: {e}")
 
 
+def log_query(cursor, query):
+    try:
+        cursor.execute("CREATE TABLE IF NOT EXISTS query_logs (query_text TEXT);")
+        # Log the query to a table named 'query_logs'
+        cursor.execute("INSERT INTO query_logs (query_text) VALUES (?)", (query,))
+    except sqlite3.Error as e:
+        print(f"Error logging query: {e}")
+
+
+def predict_most_repeatable_queries(conn, cursor, top_n=5):
+    try:
+        # Fetch query_text and count their occurrences
+        query = "SELECT query_text FROM query_logs;"
+        cursor.execute(query)
+        queries = cursor.fetchall()
+
+        # Use Counter to count occurrences of each query
+        query_counter = Counter(queries)
+
+        # Fetch the top N most common queries
+        most_common_queries = query_counter.most_common(top_n)
+
+        if most_common_queries:
+            print(f"Top {top_n} Most Repeatable Queries:")
+            print("----------------------------")
+            for query_text, count in most_common_queries:
+                print(f"Query: {query_text}\t\tExecution Count: {count}")
+        else:
+            print("No query logs found.")
+
+    except sqlite3.Error as e:
+        print(f"Error: {e}")
+
+
 def perform_boundary_check(conn, cursor, table_name, column_name, min_value, max_value):
     try:
         query = f"SELECT * FROM {table_name} WHERE {column_name} < ? OR {column_name} > ?"
@@ -105,12 +140,16 @@ def main():
     min_value = 20
     max_value = 40
     age_threshold = 18
+    sample_query = "SELECT * FROM Users WHERE email LIKE '%@example.com';"
 
     conn, cursor = connect_sqlite(database_path)
     import_csv_to_sqlite(conn, cursor, csv_file_path, table_name)
     perform_boundary_check(conn, cursor, table_name, column_name, min_value, max_value)
     validate_age_entries(conn, cursor, table_name, column_name, age_threshold)
     validate_email_addresses(conn, cursor, table_name, column_name)
+    log_query(cursor, sample_query)
+    # Predict most repeatable queries
+    predict_most_repeatable_queries(conn, cursor)
     conn.close()
 
 
