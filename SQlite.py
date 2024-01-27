@@ -2,6 +2,7 @@ import re
 import sqlite3
 import csv
 
+
 def connect_sqlite(database_path):
     try:
         # Attempt to connect to the SQLite database
@@ -18,6 +19,7 @@ def connect_sqlite(database_path):
     except sqlite3.Error as e:
         print(f"Error: {e}")
         return None, None
+
 
 def import_csv_to_sqlite(conn, cursor, csv_path, table_name):
     try:
@@ -39,6 +41,7 @@ def import_csv_to_sqlite(conn, cursor, csv_path, table_name):
     except sqlite3.Error as e:
         print(f"Error: {e}")
 
+
 def validate_email_addresses(conn, cursor, table_name, column_name):
     try:
         query = f"SELECT {column_name} FROM {table_name};"
@@ -54,6 +57,7 @@ def validate_email_addresses(conn, cursor, table_name, column_name):
                 print(f"Rest all values in column '{column_name}' are valid email addresses.")
     except sqlite3.Error as e:
         print(f"Error: {e}")
+
 
 def perform_boundary_check(conn, cursor, table_name, column_name, min_value, max_value):
     try:
@@ -108,6 +112,7 @@ def main():
     validate_age_entries(conn, cursor, table_name, column_name, age_threshold)
     validate_email_addresses(conn, cursor, table_name, column_name)
     conn.close()
+
 
 if __name__ == "__main__":
     main()
